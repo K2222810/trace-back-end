@@ -7,6 +7,8 @@ const cors = require('cors');
 const logger = require('morgan');
 
 const authRouter = require('./controllers/auth');
+const testJwtRouter = require('./controllers/test-jwt');
+const applicationRouter = require('./controllers/applications.js');
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -20,6 +22,8 @@ app.use(logger('dev'));
 
 // Routes go here
 app.use('/auth', authRouter);
+app.use('/test-jwt', testJwtRouter);
+app.use('/applications', applicationRouter);
 
 app.listen(3000, () => {
   console.log('The express app is ready!');
