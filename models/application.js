@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const applicationSchema = new Schema(
   {
-    user_id: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -29,7 +29,7 @@ const applicationSchema = new Schema(
         "startup",
         "other",
       ],
-      required: true,
+      default: "other",
     },
     status: {
       type: String,
@@ -43,6 +43,7 @@ const applicationSchema = new Schema(
         "bookmark",
       ],
       required: true,
+      default: "applied",
     },
     appliedDate: {
       type: Date,

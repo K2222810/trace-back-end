@@ -4,18 +4,19 @@ const { Schema } = mongoose;
 
 const checkInSchema = new Schema(
   {
-    application_id: {
+    applicationId: {
       type: Schema.Types.ObjectId,
       ref: "Application",
       required: true,
     },
-    user_id: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    dueDate: {
+    date: {// changed to date instead of due date
       type: Date,
+      default: Date.now,// added current date
     },
     mood: {
       type: Number,
@@ -24,6 +25,8 @@ const checkInSchema = new Schema(
     },
     note: {
       type: String,
+      required: true,
+      trim: true,
     },
   },
   { timestamps: true }

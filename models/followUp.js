@@ -4,21 +4,24 @@ const { Schema } = mongoose;
 
 const followUpSchema = new Schema(
   {
-    application_id: {
+    applicationId: {
       type: Schema.Types.ObjectId,
       ref: "Application",
       required: true,
     },
-    user_id: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    date: {
+    dueDate: {// changed this to due date because we need to track the follow ups
       type: Date,
+      required: true,
     },
     note: {
       type: String,
+      required: true,
+      trim: true,
     },
     isDone: {
       type: Boolean,
