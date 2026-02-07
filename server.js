@@ -10,6 +10,8 @@ const authRouter = require('./controllers/auth');
 const testJwtRouter = require('./controllers/test-jwt');
 const applicationRouter = require('./controllers/applications.js');
 const followUpsRouter = require('./controllers/followUps.js');
+const checkInRouter = require('./controllers/checkIns.js');
+const checkIn = require('./models/checkIn.js');
 
 mongoose.connect(process.env.MONGODB_URI);
 
@@ -26,6 +28,7 @@ app.use('/auth', authRouter);
 app.use('/test-jwt', testJwtRouter);
 app.use('/applications', applicationRouter);
 app.use('/applications/:appId/follow-ups', followUpsRouter);
+app.use('/applications/:appId/check-ins', checkInRouter);
 
 app.listen(3000, () => {
   console.log('The express app is ready!');
