@@ -95,5 +95,54 @@ router.delete('/:appId', verifyToken, async ( req, res) => {
     }
 })
 
+//POST /applications/:appId/check-ins
+router.post('/:appId/check-ins', verifyToken, async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.appId);
+    
+    if (!application) {
+      return res.status(404).json({ err: "Application not found." });
+    }
+    
+    if (!application.userId.equals(req.user._id)) {
+      return res.status(403).json({ err: "Unauthorized" });
+    }
+
+    const CheckIn = require("../models/checkIn.js");
+    const checkIn = await CheckIn.create({
+      applicationId: req.params.appId,
+      userId: req.user._id,
+      ...req.body
+    });
+
+    res.status(201).json(checkIn);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
+//GET /applications/:appId/check-ins
+router.get('/:appId/check-ins', verifyToken, async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.appId);
+    
+    if (!application) {
+      return res.status(404).json({ err: "Application not found." });
+    }
+    
+    if (!application.userId.equals(req.user._id)) {
+      return res.status(403).json({ err: "Unauthorized" });
+    }
+
+    const CheckIn = require("../models/checkIn.js");
+    const checkIns = await CheckIn.find({ applicationId: req.params.appId })
+      .sort({ createdAt: 'desc' });
+
+    res.status(200).json(checkIns);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
 
 module.exports = router;

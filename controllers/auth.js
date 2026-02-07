@@ -10,15 +10,14 @@ const saltRounds = 12;
 router.post('/sign-up', async (req, res) => {
   try {
     const userInDatabase = await User.findOne({ username: req.body.username });
-    
+
     if (userInDatabase) {
-      return res.status(409).json({err: 'Username already taken.'});
+      return res.status(409).json({ err: 'Username already taken.' });
     }
-    
+    console.log(req.body);
     const user = await User.create({
       username: req.body.username,
-      email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, saltRounds)
+      hashedPassword: bcrypt.hashSync(req.body.password, saltRounds)
     });
 
     const payload = { username: user.username, _id: user._id };
@@ -39,7 +38,7 @@ router.post('/sign-in', async (req, res) => {
     }
 
     const isPasswordCorrect = bcrypt.compareSync(
-      req.body.password, user.hashedPassword
+      req.body.password, user.password
     );
     if (!isPasswordCorrect) {
       return res.status(401).json({ err: 'Invalid credentials.' });
