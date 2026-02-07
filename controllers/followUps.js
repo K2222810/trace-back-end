@@ -2,12 +2,13 @@ const express = require("express");
 const verifyToken = require("../middleware/verify-token.js");
 const FollowUp = require("../models/followUp.js");
 const Application = require("../models/application.js");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 //POST /follow-ups
 router.post('/', verifyToken, async (req, res) => {
+  const appId = req.params.appId;
   try {
-    const application = await Application.findById(req.body.applicationId);
+    const application = await Application.findById(appId);
     
     if (!application) {
       return res.status(404).json({ err: "Application not found." });
@@ -18,7 +19,7 @@ router.post('/', verifyToken, async (req, res) => {
     }
 
     const followUp = await FollowUp.create({
-      applicationId: req.body.applicationId,
+      applicationId: appId,
       userId: req.user._id,
       dueDate: req.body.dueDate,
       note: req.body.note,
@@ -32,11 +33,24 @@ router.post('/', verifyToken, async (req, res) => {
 });
 
 //GET /follow-ups (get all follow-ups for logged in user)
-router.get('/', verifyToken, async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   try {
-    const followUps = await FollowUp.find({ userId: req.user._id })
-      .populate('applicationId')
-      .sort({ createdAt: 'desc' });
+    const appId = req.params.appId;
+
+    const application = await Application.findById(appId);
+
+    if (!application) {
+      return res.status(404).json({ err: "Application not found." });
+    }
+
+    if (!application.userId.equals(req.user._id)) {
+      return res.status(403).json({ err: "Unauthorized" });
+    }
+
+    const followUps = await FollowUp.find({
+      applicationId: appId,
+      userId: req.user._id,
+    }).sort({ createdAt: "desc" });
 
     res.status(200).json(followUps);
   } catch (err) {
@@ -44,24 +58,20 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-//PUT /follow-ups/:id
-router.put('/:id', verifyToken, async (req, res) => {
+//PUT /follow-ups/:followUpId
+router.put("/:followUpId", verifyToken, async (req, res) => {
   try {
-    const followUp = await FollowUp.findById(req.params.id);
-    
-    if (!followUp) {
-      return res.status(404).json({ err: "Follow-up not found." });
-    }
-    
-    if (!followUp.userId.equals(req.user._id)) {
-      return res.status(403).json({ err: "Unauthorized" });
-    }
+    const { appId, followUpId } = req.params;
 
-    const updatedFollowUp = await FollowUp.findByIdAndUpdate(
-      req.params.id,
+    const updatedFollowUp = await FollowUp.findOneAndUpdate(
+      { _id: followUpId, applicationId: appId, userId: req.user._id },
       req.body,
       { new: true, runValidators: true }
     );
+
+    if (!updatedFollowUp) {
+      return res.status(404).json({ err: "Follow-up not found for this app/user." });
+    }
 
     res.status(200).json(updatedFollowUp);
   } catch (err) {
@@ -69,20 +79,27 @@ router.put('/:id', verifyToken, async (req, res) => {
   }
 });
 
-//DELETE /follow-ups/:id
-router.delete('/:id', verifyToken, async (req, res) => {
+//DELETE /follow-ups/:followUpId
+router.delete("/:followUpId", verifyToken, async (req, res) => {
   try {
-    const followUp = await FollowUp.findById(req.params.id);
-    
+    const { appId, followUpId } = req.params;
+
+    const followUp = await FollowUp.findById(followUpId);
+
     if (!followUp) {
       return res.status(404).json({ err: "Follow-up not found." });
     }
-    
+
     if (!followUp.userId.equals(req.user._id)) {
       return res.status(403).json({ err: "Unauthorized" });
     }
 
-    await FollowUp.findByIdAndDelete(req.params.id);
+    if (!followUp.applicationId.equals(appId)) {
+      return res.status(400).json({ err: "Follow-up does not belong to this application." });
+    }
+
+    await FollowUp.findByIdAndDelete(followUpId);
+
     res.status(200).json({ message: "Follow-up deleted successfully" });
   } catch (err) {
     res.status(500).json({ err: err.message });

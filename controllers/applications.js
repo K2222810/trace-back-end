@@ -1,6 +1,8 @@
 const express = require("express");
 const verifyToken = require("../middleware/verify-token.js");
 const Application = require("../models/application.js");
+const FollowUp = require("../models/followUp.js");
+const CheckIn = require("../models/checkIn.js");
 const router = express.Router();
 
 //POST /applications
@@ -43,7 +45,22 @@ router.get('/:appId', verifyToken, async (req, res) => {
       return res.status(403).json({ err: 'Unauthorized' });
     }
 
-    res.status(200).json(application);
+    let followUps = [];
+    let checkIns = [];
+
+    if (application.status === "working") {
+      checkIns = await CheckIn.find({
+        applicationId: application._id,
+        userId: req.user._id,
+      }).sort({ createdAt: "desc" });
+    } else {
+      followUps = await FollowUp.find({
+        applicationId: application._id,
+        userId: req.user._id,
+      }).sort({ createdAt: "desc" });
+    }
+
+    res.status(200).json({ application, followUps, checkIns });
   } catch (err) {
     res.status(500).json({ err: err.message });
   }

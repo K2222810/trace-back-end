@@ -25,7 +25,7 @@ app.use(logger('dev'));
 app.use('/auth', authRouter);
 app.use('/test-jwt', testJwtRouter);
 app.use('/applications', applicationRouter);
-app.use('/follow-ups', followUpsRouter);
+app.use('/applications/:appId/follow-ups', followUpsRouter);
 
 app.listen(3000, () => {
   console.log('The express app is ready!');
