@@ -76,10 +76,10 @@ router.put('/:appId', verifyToken, async (req, res) => {
 });
 
 //DELETE /applications/:appId
-router.delete(':appId', verifyToken, async ( req, res) => {
+router.delete('/:appId', verifyToken, async ( req, res) => {
     try {
     const application = await Application.findById(req.params.appId);
-    
+
     if (!application) {
       return res.status(404).json({ err: "Application not found." });
     } 
