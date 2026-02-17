@@ -30,6 +30,10 @@ app.use('/applications/:appId/follow-ups', followUpsRouter);
 app.use('/applications/:appId/check-ins', checkInRouter);
 
 
-app.listen(3000, () => {
-  console.log('The express app is ready!');
+const PORT = process.env.PORT ? process.env.PORT : 3000;
+
+// Start the server and listen on port 3000
+console.log("About to listen on", process.env.PORT);
+app.listen(PORT, () => {
+  console.log(`The express app is ready!, ${PORT}`);
 });
