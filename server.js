@@ -11,7 +11,6 @@ const testJwtRouter = require('./controllers/test-jwt');
 const applicationRouter = require('./controllers/applications.js');
 const followUpsRouter = require('./controllers/followUps.js');
 const checkInRouter = require('./controllers/checkIns.js');
-const checkIn = require('./models/checkIn.js');
 
 mongoose.connect(process.env.MONGODB_URI);
 
